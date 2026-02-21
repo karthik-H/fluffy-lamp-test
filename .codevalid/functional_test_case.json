@@ -1,0 +1,381 @@
+{
+  "function": [
+    {
+      "implementation_id": "main_entrypoint_fetch_users",
+      "test_cases": [
+        {
+          "description": "Test that the program fetches all users from JSONPlaceholder API and writes them to CSV correctly including all required columns.",
+          "id": "TC001_successful_fetch_and_csv_write",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "Successful API fetch and CSV file write",
+          "test_setup": {
+            "given": "JSONPlaceholder API at /users returns a valid list of 10 users; disk is writable and CSV file can be created.",
+            "then": "CSV file is created with columns: id, name, username, email, phone, website, address, company. address and company columns contain JSON serialized objects. All 10 users are present. Logging contains summary info for each user.",
+            "when": "main() is executed"
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Test program behavior when JSONPlaceholder API is unreachable due to network issues.",
+          "id": "TC002_api_network_failure",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "API network failure",
+          "test_setup": {
+            "given": "Network error occurs when HTTP GET request is made to /users endpoint.",
+            "then": "Program terminates and outputs a clear error message indicating network/API fetch failure. No CSV file is created.",
+            "when": "main() is executed"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Test program behavior when API returns an empty list of users.",
+          "id": "TC003_api_returns_empty_list",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "API returns empty list of users",
+          "test_setup": {
+            "given": "JSONPlaceholder API /users returns an empty array; disk is writable.",
+            "then": "CSV file is created with correct columns but contains no data rows. Logging contains no user summaries.",
+            "when": "main() is executed"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Test program behavior when CSV file cannot be written due to file permission error.",
+          "id": "TC004_csv_write_permission_error",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "CSV file write permission error",
+          "test_setup": {
+            "given": "API returns users successfully; CSV file path is unwritable (e.g., permission denied).",
+            "then": "Program terminates and outputs a clear error message indicating file write failure. No CSV file is written.",
+            "when": "main() is executed"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Test program behavior when disk is full and CSV file cannot be written.",
+          "id": "TC005_csv_write_disk_full_error",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "CSV file write fails due to disk full",
+          "test_setup": {
+            "given": "API returns users successfully; disk is full and CSV file cannot be created.",
+            "then": "Program terminates and outputs a clear error message indicating disk space/file write failure. No CSV file is written.",
+            "when": "main() is executed"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Test program behavior when API returns a response that is not a valid JSON array of users.",
+          "id": "TC006_api_returns_invalid_format",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "API returns invalid response format",
+          "test_setup": {
+            "given": "API returns malformed or non-JSON response (e.g., string or object instead of array).",
+            "then": "Program terminates and outputs a clear error message indicating invalid response format. No CSV file is written.",
+            "when": "main() is executed"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Test handling of user fields containing special characters, quotes, commas, newlines, and unicode.",
+          "id": "TC007_user_data_with_special_characters",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "User data contains special characters",
+          "test_setup": {
+            "given": "API returns user objects with special characters in name, email, address, company, etc.; disk is writable.",
+            "then": "CSV file is created; special characters are properly preserved in CSV fields; address and company columns contain valid JSON serialization.",
+            "when": "main() is executed"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Test that logging is properly initialized and summary info for each user is logged.",
+          "id": "TC008_logging_initialized_and_summary_printed",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "Logging initialization and user summary",
+          "test_setup": {
+            "given": "API returns users successfully; disk is writable.",
+            "then": "Logging is initialized; summary info for each user is logged as per pseudo code; CSV file is created.",
+            "when": "main() is executed"
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Test behavior when some user objects returned by API have missing fields.",
+          "id": "TC009_partial_user_object",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "User object with missing fields",
+          "test_setup": {
+            "given": "API returns user objects missing one or more fields (e.g., address or company); disk is writable.",
+            "then": "CSV file is created; missing fields are handled as null or empty in CSV; no mapping or validation is performed.",
+            "when": "main() is executed"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Test program behavior when API returns a large list (e.g., 1000+ users).",
+          "id": "TC010_large_number_of_users",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "API returns large number of users",
+          "test_setup": {
+            "given": "API returns a list of 1000 user objects; disk is writable.",
+            "then": "CSV file is created with all users; performance is acceptable; all required columns are present.",
+            "when": "main() is executed"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Ensure user data is written to CSV exactly as received from API, with no transformation or validation.",
+          "id": "TC011_no_transformation_of_user_data",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "No transformation of user data",
+          "test_setup": {
+            "given": "API returns users with various values; disk is writable.",
+            "then": "CSV file contains raw user data; address and company columns are JSON serialized as received; no mapping, transformation, or validation is applied.",
+            "when": "main() is executed"
+          },
+          "type": "positive"
+        }
+      ]
+    },
+    {
+      "implementation_id": "user_service_get_all_users",
+      "test_cases": [
+        {
+          "description": "Verify that get_all_users retrieves all users when UserRepository.fetch_all_users returns a valid list of User domain models.",
+          "id": "tc_get_all_users_positive_standard",
+          "implementation_id": "user_service_get_all_users",
+          "name": "get_all_users_returns_all_users_successfully",
+          "test_setup": {
+            "given": "UserRepository.fetch_all_users is mocked to return a list of 10 User domain models matching the JSONPlaceholder /users response.",
+            "then": "Function returns a list of 10 User domain models with fields: id, name, username, email, phone, website, address, company.",
+            "when": "get_all_users is called."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Verify that get_all_users returns an empty list when no users are available.",
+          "id": "tc_get_all_users_edge_empty_list",
+          "implementation_id": "user_service_get_all_users",
+          "name": "get_all_users_returns_empty_list_when_no_users",
+          "test_setup": {
+            "given": "UserRepository.fetch_all_users is mocked to return an empty list.",
+            "then": "Function returns an empty list.",
+            "when": "get_all_users is called."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify that get_all_users handles network error gracefully when API is unavailable.",
+          "id": "tc_get_all_users_negative_network_error",
+          "implementation_id": "user_service_get_all_users",
+          "name": "get_all_users_handles_network_error",
+          "test_setup": {
+            "given": "UserRepository.fetch_all_users is mocked to raise a network error (e.g., requests.ConnectionError).",
+            "then": "Function propagates or handles the error, terminating with a clear error message indicating API is unavailable.",
+            "when": "get_all_users is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify that get_all_users handles API failure scenarios (e.g., HTTP 500 or 404).",
+          "id": "tc_get_all_users_negative_api_failure_status",
+          "implementation_id": "user_service_get_all_users",
+          "name": "get_all_users_handles_api_failure_status",
+          "test_setup": {
+            "given": "UserRepository.fetch_all_users is mocked to raise an HTTP error (e.g., requests.HTTPError with 500 status).",
+            "then": "Function propagates or handles the error, terminating with a clear error message indicating API failure.",
+            "when": "get_all_users is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify that get_all_users correctly retrieves and returns a large number of users.",
+          "id": "tc_get_all_users_edge_large_dataset",
+          "implementation_id": "user_service_get_all_users",
+          "name": "get_all_users_handles_large_number_of_users",
+          "test_setup": {
+            "given": "UserRepository.fetch_all_users is mocked to return a list of 1000 User domain models.",
+            "then": "Function returns a list of 1000 User domain models.",
+            "when": "get_all_users is called."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify that get_all_users handles cases where UserRepository returns users with missing required fields.",
+          "id": "tc_get_all_users_negative_invalid_user_format",
+          "implementation_id": "user_service_get_all_users",
+          "name": "get_all_users_handles_invalid_user_format",
+          "test_setup": {
+            "given": "UserRepository.fetch_all_users is mocked to return User domain models missing required fields (e.g., no email, no id).",
+            "then": "Function returns raw data as-is (per requirements: no mapping, transformation, or validation), even if some fields are missing.",
+            "when": "get_all_users is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify that get_all_users correctly retrieves users with unicode characters in fields like name, address, company.",
+          "id": "tc_get_all_users_edge_unicode_characters",
+          "implementation_id": "user_service_get_all_users",
+          "name": "get_all_users_handles_unicode_characters",
+          "test_setup": {
+            "given": "UserRepository.fetch_all_users is mocked to return User domain models containing unicode characters in their fields.",
+            "then": "Function returns users with unicode characters preserved.",
+            "when": "get_all_users is called."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify that the overall service layer handles CSV writing errors (e.g., disk full, permission denied) and outputs a clear error message.",
+          "id": "tc_get_all_users_negative_csv_write_error",
+          "implementation_id": "user_service_get_all_users",
+          "name": "get_all_users_handles_csv_write_error",
+          "test_setup": {
+            "given": "CSV writing function is mocked to raise an IOError (e.g., PermissionError, OSError).",
+            "then": "Function (or program) terminates with a clear error message indicating CSV file cannot be written.",
+            "when": "get_all_users is called and its output is passed to CSV writing."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify that get_all_users handles cases where API response does not contain user data (e.g., empty response, wrong key).",
+          "id": "tc_get_all_users_negative_no_users_key_in_response",
+          "implementation_id": "user_service_get_all_users",
+          "name": "get_all_users_handles_no_users_key_in_response",
+          "test_setup": {
+            "given": "UserRepository.fetch_all_users is mocked to return None or an unexpected structure (e.g., {'error': 'not found'}).",
+            "then": "Function returns None or an empty list, per implementation; no transformation or validation is performed.",
+            "when": "get_all_users is called."
+          },
+          "type": "negative"
+        }
+      ]
+    },
+    {
+      "implementation_id": "user_repository_fetch_all_users",
+      "test_cases": [
+        {
+          "description": "Verify that fetch_all_users retrieves all users from JSONPlaceholder and parses them into User objects.",
+          "id": "TC01_fetch_all_users_success",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "Fetch all users successfully",
+          "test_setup": {
+            "given": "base_url is 'https://jsonplaceholder.typicode.com', users_endpoint is '/users', API responds with valid user JSON array (10 users).",
+            "then": "Returns a list of 10 User objects, each with fields id, name, username, email, phone, website, address, and company populated from response.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Verify behavior when the API responds with an empty array.",
+          "id": "TC02_fetch_all_users_empty_response",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "Fetch users with empty response",
+          "test_setup": {
+            "given": "API responds with empty JSON array [].",
+            "then": "Returns an empty list; no User objects are created.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify behavior when user objects are missing optional fields such as address or company.",
+          "id": "TC03_fetch_all_users_partial_fields",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "Fetch users with missing fields",
+          "test_setup": {
+            "given": "API responds with user JSON objects missing 'address' or 'company' fields.",
+            "then": "Returns User objects with missing fields as None or default values, as per domain model handling.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify error handling when network error occurs during API request.",
+          "id": "TC04_fetch_all_users_network_error",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "API network error",
+          "test_setup": {
+            "given": "API is unreachable (network timeout, DNS error, etc.).",
+            "then": "Raises error; program terminates and outputs a clear error message indicating network issue.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify error handling when API responds with error status code (e.g., 404, 500).",
+          "id": "TC05_fetch_all_users_non_200_status",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "API returns non-200 HTTP status",
+          "test_setup": {
+            "given": "API responds with HTTP status code other than 200 (e.g., 404 Not Found).",
+            "then": "Raises error; program terminates and outputs a clear error message indicating failed request.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify error handling when API response is not valid JSON.",
+          "id": "TC06_fetch_all_users_malformed_json",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "API returns malformed JSON",
+          "test_setup": {
+            "given": "API responds with malformed JSON (e.g., syntax error in response).",
+            "then": "Raises error; program terminates and outputs a clear error message about JSON parsing failure.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify behavior when user objects include additional unexpected fields.",
+          "id": "TC07_fetch_all_users_extra_fields",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "API returns extra fields in user objects",
+          "test_setup": {
+            "given": "API responds with user objects containing extra fields not defined in domain model.",
+            "then": "User objects are parsed using only expected fields; extra fields are ignored.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify error handling when base_url is invalid.",
+          "id": "TC08_fetch_all_users_invalid_base_url",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "Invalid base URL",
+          "test_setup": {
+            "given": "base_url is set to an invalid URL (e.g., malformed string).",
+            "then": "Raises error; program terminates and outputs a clear error message about invalid URL.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify error handling when users_endpoint is incorrect.",
+          "id": "TC09_fetch_all_users_invalid_endpoint",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "Invalid endpoint",
+          "test_setup": {
+            "given": "users_endpoint is set to a non-existent path (e.g., '/userrr').",
+            "then": "Raises error; program terminates and outputs a clear error message indicating failed request.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify behavior when API responds with a large number of user objects (e.g., 1000).",
+          "id": "TC10_fetch_all_users_large_response",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "Fetch large number of users",
+          "test_setup": {
+            "given": "API responds with JSON array of 1000 user objects.",
+            "then": "Returns a list of 1000 User objects with expected fields populated.",
+            "when": "fetch_all_users is called."
+          },
+          "type": "edge"
+        }
+      ]
+    }
+  ],
+  "component": [],
+  "endpoint": []
+}
