@@ -52,6 +52,7 @@ def get_logged_messages(caplog):
 @patch("src.services.user_service.requests.get")
 def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
     """
+    Test Case 1: Successful API fetch and CSV file write
     Given: JSONPlaceholder API at /users returns a valid list of 10 users; disk is writable and CSV file can be created.
     When: main() is executed
     Then: CSV file is created with columns: id, name, username, email, phone, website, address, company. address and company columns contain JSON serialized objects. All 10 users are present. Logging contains summary info for each user.
@@ -82,6 +83,7 @@ def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
 @patch("src.services.user_service.requests.get")
 def test_api_network_failure(mock_get):
     """
+    Test Case 2: API network failure
     Given: Network error occurs when HTTP GET request is made to /users endpoint.
     When: main() is executed
     Then: Program terminates and outputs a clear error message indicating network/API fetch failure. No CSV file is created.
@@ -95,6 +97,7 @@ def test_api_network_failure(mock_get):
 @patch("src.services.user_service.requests.get")
 def test_api_returns_empty_list_of_users(mock_get, caplog):
     """
+    Test Case 3: API returns empty list of users
     Given: JSONPlaceholder API /users returns an empty array; disk is writable.
     When: main() is executed
     Then: CSV file is created with correct columns but contains no data rows. Logging contains no user summaries.
@@ -114,6 +117,7 @@ def test_api_returns_empty_list_of_users(mock_get, caplog):
 @patch("src.services.user_service.requests.get")
 def test_csv_file_write_permission_error(mock_get):
     """
+    Test Case 4: CSV file write permission error
     Given: API returns users successfully; CSV file path is unwritable (e.g., permission denied).
     When: main() is executed
     Then: Program terminates and outputs a clear error message indicating file write failure. No CSV file is written.
@@ -129,6 +133,7 @@ def test_csv_file_write_permission_error(mock_get):
 @patch("src.services.user_service.requests.get")
 def test_csv_file_write_fails_due_to_disk_full(mock_get):
     """
+    Test Case 5: CSV file write fails due to disk full
     Given: API returns users successfully; disk is full and CSV file cannot be created.
     When: main() is executed
     Then: Program terminates and outputs a clear error message indicating disk space/file write failure. No CSV file is written.
@@ -144,6 +149,7 @@ def test_csv_file_write_fails_due_to_disk_full(mock_get):
 @patch("src.services.user_service.requests.get")
 def test_api_returns_invalid_response_format(mock_get):
     """
+    Test Case 6: API returns invalid response format
     Given: API returns malformed or non-JSON response (e.g., string or object instead of array).
     When: main() is executed
     Then: Program terminates and outputs a clear error message indicating invalid response format. No CSV file is written.
@@ -157,6 +163,7 @@ def test_api_returns_invalid_response_format(mock_get):
 @patch("src.services.user_service.requests.get")
 def test_user_data_contains_special_characters(mock_get):
     """
+    Test Case 7: User data contains special characters
     Given: API returns user objects with special characters in name, email, address, company, etc.; disk is writable.
     When: main() is executed
     Then: CSV file is created; special characters are properly preserved in CSV fields; address and company columns contain valid JSON serialization.
@@ -179,6 +186,7 @@ def test_user_data_contains_special_characters(mock_get):
 @patch("src.services.user_service.requests.get")
 def test_logging_initialization_and_user_summary(mock_get, caplog):
     """
+    Test Case 8: Logging initialization and user summary
     Given: API returns users successfully; disk is writable.
     When: main() is executed
     Then: Logging is initialized; summary info for each user is logged as per pseudo code; CSV file is created.
@@ -196,6 +204,7 @@ def test_logging_initialization_and_user_summary(mock_get, caplog):
 @patch("src.services.user_service.requests.get")
 def test_user_object_with_missing_fields(mock_get):
     """
+    Test Case 9: User object with missing fields
     Given: API returns user objects missing one or more fields (e.g., address or company); disk is writable.
     When: main() is executed
     Then: CSV file is created; missing fields are handled as null or empty in CSV; no mapping or validation is performed.
@@ -216,6 +225,7 @@ def test_user_object_with_missing_fields(mock_get):
 @patch("src.services.user_service.requests.get")
 def test_api_returns_large_number_of_users(mock_get):
     """
+    Test Case 10: API returns large number of users
     Given: API returns a list of 1000 user objects; disk is writable.
     When: main() is executed
     Then: CSV file is created with all users; performance is acceptable; all required columns are present.
@@ -236,6 +246,7 @@ def test_api_returns_large_number_of_users(mock_get):
 @patch("src.services.user_service.requests.get")
 def test_no_transformation_of_user_data(mock_get):
     """
+    Test Case 11: No transformation of user data
     Given: API returns users with various values; disk is writable.
     When: main() is executed
     Then: CSV file contains raw user data; address and company columns are JSON serialized as received; no mapping, transformation, or validation is applied.
