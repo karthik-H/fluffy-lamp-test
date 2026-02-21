@@ -8,7 +8,6 @@ from src.main import main
 
 # Constants
 CSV_FILE_PATH = "users.csv"
-API_URL = "https://jsonplaceholder.typicode.com/users"
 
 @pytest.fixture(autouse=True)
 def cleanup_csv():
