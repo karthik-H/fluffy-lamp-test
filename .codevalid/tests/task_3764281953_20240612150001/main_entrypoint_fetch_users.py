@@ -48,7 +48,6 @@ def read_csv_rows(path):
 def get_logged_messages(caplog):
     return [record.getMessage() for record in caplog.records]
 
-# Test Case 1: Successful API fetch and CSV file write
 @patch("src.services.user_service.requests.get")
 def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
     """
@@ -79,7 +78,6 @@ def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
     for user in users:
         assert any(str(user["id"]) in msg and user["name"] in msg for msg in messages)
 
-# Test Case 2: API network failure
 @patch("src.services.user_service.requests.get")
 def test_api_network_failure(mock_get):
     """
@@ -93,7 +91,6 @@ def test_api_network_failure(mock_get):
         main()
     assert not os.path.exists(CSV_FILE_PATH)
 
-# Test Case 3: API returns empty list of users
 @patch("src.services.user_service.requests.get")
 def test_api_returns_empty_list_of_users(mock_get, caplog):
     """
@@ -113,7 +110,6 @@ def test_api_returns_empty_list_of_users(mock_get, caplog):
     messages = get_logged_messages(caplog)
     assert not any("User" in msg for msg in messages)
 
-# Test Case 4: CSV file write permission error
 @patch("src.services.user_service.requests.get")
 def test_csv_file_write_permission_error(mock_get):
     """
@@ -129,7 +125,6 @@ def test_csv_file_write_permission_error(mock_get):
             main()
     assert not os.path.exists(CSV_FILE_PATH)
 
-# Test Case 5: CSV file write fails due to disk full
 @patch("src.services.user_service.requests.get")
 def test_csv_file_write_fails_due_to_disk_full(mock_get):
     """
@@ -145,7 +140,6 @@ def test_csv_file_write_fails_due_to_disk_full(mock_get):
             main()
     assert not os.path.exists(CSV_FILE_PATH)
 
-# Test Case 6: API returns invalid response format
 @patch("src.services.user_service.requests.get")
 def test_api_returns_invalid_response_format(mock_get):
     """
@@ -159,7 +153,6 @@ def test_api_returns_invalid_response_format(mock_get):
         main()
     assert not os.path.exists(CSV_FILE_PATH)
 
-# Test Case 7: User data contains special characters
 @patch("src.services.user_service.requests.get")
 def test_user_data_contains_special_characters(mock_get):
     """
@@ -182,7 +175,6 @@ def test_user_data_contains_special_characters(mock_get):
         assert json.loads(row["address"]) == user["address"]
         assert json.loads(row["company"]) == user["company"]
 
-# Test Case 8: Logging initialization and user summary
 @patch("src.services.user_service.requests.get")
 def test_logging_initialization_and_user_summary(mock_get, caplog):
     """
@@ -200,7 +192,6 @@ def test_logging_initialization_and_user_summary(mock_get, caplog):
         assert any(str(user["id"]) in msg and user["name"] in msg for msg in messages)
     assert os.path.exists(CSV_FILE_PATH)
 
-# Test Case 9: User object with missing fields
 @patch("src.services.user_service.requests.get")
 def test_user_object_with_missing_fields(mock_get):
     """
@@ -221,7 +212,6 @@ def test_user_object_with_missing_fields(mock_get):
             else:
                 assert row[field] == "" or row[field] is None
 
-# Test Case 10: API returns large number of users
 @patch("src.services.user_service.requests.get")
 def test_api_returns_large_number_of_users(mock_get):
     """
@@ -242,7 +232,6 @@ def test_api_returns_large_number_of_users(mock_get):
         assert row["id"] == str(user["id"])
         assert row["name"] == user["name"]
 
-# Test Case 11: No transformation of user data
 @patch("src.services.user_service.requests.get")
 def test_no_transformation_of_user_data(mock_get):
     """
