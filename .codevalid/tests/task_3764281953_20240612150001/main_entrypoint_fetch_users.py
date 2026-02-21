@@ -6,7 +6,6 @@ import logging
 from unittest.mock import patch, MagicMock
 from src.main import main
 
-# Constants
 CSV_FILE_PATH = "users.csv"
 
 @pytest.fixture(autouse=True)
