@@ -63,6 +63,8 @@ def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
     assert os.path.exists(CSV_FILE_PATH)
     rows = read_csv_rows(CSV_FILE_PATH)
     assert len(rows) == 10
+    expected_columns = ["id", "name", "username", "email", "phone", "website", "address", "company"]
+    assert set(rows[0].keys()) == set(expected_columns)
     for row, user in zip(rows, users):
         assert row["id"] == str(user["id"])
         assert row["name"] == user["name"]
@@ -103,6 +105,8 @@ def test_api_returns_empty_list_of_users(mock_get, caplog):
     assert os.path.exists(CSV_FILE_PATH)
     rows = read_csv_rows(CSV_FILE_PATH)
     assert len(rows) == 0
+    expected_columns = ["id", "name", "username", "email", "phone", "website", "address", "company"]
+    assert set(rows[0].keys()) == set(expected_columns) if rows else True
     messages = get_logged_messages(caplog)
     assert not any("User" in msg for msg in messages)
 
@@ -222,6 +226,8 @@ def test_api_returns_large_number_of_users(mock_get):
     assert os.path.exists(CSV_FILE_PATH)
     rows = read_csv_rows(CSV_FILE_PATH)
     assert len(rows) == 1000
+    expected_columns = ["id", "name", "username", "email", "phone", "website", "address", "company"]
+    assert set(rows[0].keys()) == set(expected_columns)
     for row, user in zip(rows, users):
         assert row["id"] == str(user["id"])
         assert row["name"] == user["name"]
