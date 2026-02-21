@@ -135,7 +135,8 @@
           },
           "type": "positive"
         }
-      ]
+      ],
+      "test_path": ".codevalid/tests/task_3764281953_20240612150001/main_entrypoint_fetch_users.py"
     },
     {
       "implementation_id": "user_service_get_all_users",
