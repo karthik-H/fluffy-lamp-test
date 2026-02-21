@@ -3,7 +3,6 @@ import os
 import json
 import csv
 import logging
-from unittest import mock
 from unittest.mock import patch, MagicMock
 from src.main import main
 
@@ -54,6 +53,11 @@ def get_logged_messages(caplog):
 # Test Case 1: Successful API fetch and CSV file write
 @patch("src.services.user_service.requests.get")
 def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
+    """
+    Given: JSONPlaceholder API at /users returns a valid list of 10 users; disk is writable and CSV file can be created.
+    When: main() is executed
+    Then: CSV file is created with columns: id, name, username, email, phone, website, address, company. address and company columns contain JSON serialized objects. All 10 users are present. Logging contains summary info for each user.
+    """
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
     caplog.set_level(logging.INFO)
@@ -70,7 +74,6 @@ def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
         assert row["website"] == user["website"]
         assert json.loads(row["address"]) == user["address"]
         assert json.loads(row["company"]) == user["company"]
-    # Logging contains summary info for each user
     messages = get_logged_messages(caplog)
     for user in users:
         assert any(str(user["id"]) in msg and user["name"] in msg for msg in messages)
@@ -78,6 +81,11 @@ def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
 # Test Case 2: API network failure
 @patch("src.services.user_service.requests.get")
 def test_api_network_failure(mock_get):
+    """
+    Given: Network error occurs when HTTP GET request is made to /users endpoint.
+    When: main() is executed
+    Then: Program terminates and outputs a clear error message indicating network/API fetch failure. No CSV file is created.
+    """
     mock_get.side_effect = Exception("Network error")
     with pytest.raises(SystemExit):
         main()
@@ -86,6 +94,11 @@ def test_api_network_failure(mock_get):
 # Test Case 3: API returns empty list of users
 @patch("src.services.user_service.requests.get")
 def test_api_returns_empty_list_of_users(mock_get, caplog):
+    """
+    Given: JSONPlaceholder API /users returns an empty array; disk is writable.
+    When: main() is executed
+    Then: CSV file is created with correct columns but contains no data rows. Logging contains no user summaries.
+    """
     mock_get.return_value = MagicMock(status_code=200, json=lambda: [])
     caplog.set_level(logging.INFO)
     main()
@@ -93,12 +106,16 @@ def test_api_returns_empty_list_of_users(mock_get, caplog):
     rows = read_csv_rows(CSV_FILE_PATH)
     assert len(rows) == 0
     messages = get_logged_messages(caplog)
-    # No user summaries
     assert not any("User" in msg for msg in messages)
 
 # Test Case 4: CSV file write permission error
 @patch("src.services.user_service.requests.get")
 def test_csv_file_write_permission_error(mock_get):
+    """
+    Given: API returns users successfully; CSV file path is unwritable (e.g., permission denied).
+    When: main() is executed
+    Then: Program terminates and outputs a clear error message indicating file write failure. No CSV file is written.
+    """
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
     with patch("builtins.open", side_effect=PermissionError("Permission denied")):
@@ -109,6 +126,11 @@ def test_csv_file_write_permission_error(mock_get):
 # Test Case 5: CSV file write fails due to disk full
 @patch("src.services.user_service.requests.get")
 def test_csv_file_write_fails_due_to_disk_full(mock_get):
+    """
+    Given: API returns users successfully; disk is full and CSV file cannot be created.
+    When: main() is executed
+    Then: Program terminates and outputs a clear error message indicating disk space/file write failure. No CSV file is written.
+    """
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
     with patch("builtins.open", side_effect=OSError("No space left on device")):
@@ -119,6 +141,11 @@ def test_csv_file_write_fails_due_to_disk_full(mock_get):
 # Test Case 6: API returns invalid response format
 @patch("src.services.user_service.requests.get")
 def test_api_returns_invalid_response_format(mock_get):
+    """
+    Given: API returns malformed or non-JSON response (e.g., string or object instead of array).
+    When: main() is executed
+    Then: Program terminates and outputs a clear error message indicating invalid response format. No CSV file is written.
+    """
     mock_get.return_value = MagicMock(status_code=200, json=lambda: "not a list")
     with pytest.raises(SystemExit):
         main()
@@ -127,6 +154,11 @@ def test_api_returns_invalid_response_format(mock_get):
 # Test Case 7: User data contains special characters
 @patch("src.services.user_service.requests.get")
 def test_user_data_contains_special_characters(mock_get):
+    """
+    Given: API returns user objects with special characters in name, email, address, company, etc.; disk is writable.
+    When: main() is executed
+    Then: CSV file is created; special characters are properly preserved in CSV fields; address and company columns contain valid JSON serialization.
+    """
     users = mock_users(special_chars=True)
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
     main()
@@ -144,12 +176,16 @@ def test_user_data_contains_special_characters(mock_get):
 # Test Case 8: Logging initialization and user summary
 @patch("src.services.user_service.requests.get")
 def test_logging_initialization_and_user_summary(mock_get, caplog):
+    """
+    Given: API returns users successfully; disk is writable.
+    When: main() is executed
+    Then: Logging is initialized; summary info for each user is logged as per pseudo code; CSV file is created.
+    """
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
     caplog.set_level(logging.INFO)
     main()
     messages = get_logged_messages(caplog)
-    # Logging is initialized and contains user summaries
     for user in users:
         assert any(str(user["id"]) in msg and user["name"] in msg for msg in messages)
     assert os.path.exists(CSV_FILE_PATH)
@@ -157,13 +193,17 @@ def test_logging_initialization_and_user_summary(mock_get, caplog):
 # Test Case 9: User object with missing fields
 @patch("src.services.user_service.requests.get")
 def test_user_object_with_missing_fields(mock_get):
+    """
+    Given: API returns user objects missing one or more fields (e.g., address or company); disk is writable.
+    When: main() is executed
+    Then: CSV file is created; missing fields are handled as null or empty in CSV; no mapping or validation is performed.
+    """
     users = mock_users(missing_fields=True)
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
     main()
     assert os.path.exists(CSV_FILE_PATH)
     rows = read_csv_rows(CSV_FILE_PATH)
     for row, user in zip(rows, users):
-        # Missing fields should be empty or null in CSV
         for field in ["address", "company"]:
             if field in user:
                 assert json.loads(row[field]) == user[field]
@@ -173,6 +213,11 @@ def test_user_object_with_missing_fields(mock_get):
 # Test Case 10: API returns large number of users
 @patch("src.services.user_service.requests.get")
 def test_api_returns_large_number_of_users(mock_get):
+    """
+    Given: API returns a list of 1000 user objects; disk is writable.
+    When: main() is executed
+    Then: CSV file is created with all users; performance is acceptable; all required columns are present.
+    """
     users = mock_users(count=1000)
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
     main()
@@ -186,13 +231,17 @@ def test_api_returns_large_number_of_users(mock_get):
 # Test Case 11: No transformation of user data
 @patch("src.services.user_service.requests.get")
 def test_no_transformation_of_user_data(mock_get):
+    """
+    Given: API returns users with various values; disk is writable.
+    When: main() is executed
+    Then: CSV file contains raw user data; address and company columns are JSON serialized as received; no mapping, transformation, or validation is applied.
+    """
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
     main()
     assert os.path.exists(CSV_FILE_PATH)
     rows = read_csv_rows(CSV_FILE_PATH)
     for row, user in zip(rows, users):
-        # Data is written as received, address/company JSON serialized
         assert row["name"] == user["name"]
         assert row["username"] == user["username"]
         assert row["email"] == user["email"]
