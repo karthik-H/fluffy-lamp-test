@@ -4,12 +4,16 @@ import json
 import csv
 import logging
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+import os
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
+domain_dir = os.path.join(project_root, 'src', 'domain')
+if domain_dir not in sys.path:
+    sys.path.insert(0, domain_dir)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 from unittest.mock import patch, MagicMock
-# Import UserService from the correct path as per project structure
 from src.services.user_service import UserService
 from src.main import main
-from src.domain.models import User
 
 CSV_FILE_PATH = "users.csv"
 
