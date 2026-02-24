@@ -3,7 +3,7 @@ Entrypoint for fetching and preparing user data from JSONPlaceholder API.
 """
 
 import logging
-from services.user_service import UserService
+from src.services.user_service import UserService
 
 def main():
     logging.basicConfig(

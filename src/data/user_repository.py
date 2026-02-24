@@ -4,8 +4,8 @@ Repository for fetching user data from the JSONPlaceholder API.
 
 import requests
 from typing import List
-from domain.models import User, Address, Company
-from config.config import Config
+from src.domain.models import User, Address, Company
+from src.config.config import Config
 
 
 

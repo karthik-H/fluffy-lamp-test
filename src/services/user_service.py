@@ -3,8 +3,8 @@ Service layer for user-related business logic.
 """
 
 from typing import List
-from domain.models import User
-from data.user_repository import UserRepository
+from src.domain.models import User
+from src.data.user_repository import UserRepository
 
 
 class UserService:
