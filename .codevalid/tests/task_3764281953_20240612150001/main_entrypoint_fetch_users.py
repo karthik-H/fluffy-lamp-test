@@ -32,10 +32,15 @@ def mock_users(count=10, special_chars=False, missing_fields=False):
             "website": f"website{i+1}.com" if not special_chars else f"websíte{i+1}.com",
             "address": {
                 "street": f"Street {i+1}" if not special_chars else f"Stréet \"{i+1},\nΩ\"",
+                "suite": f"Suite {i+1}" if not special_chars else f"Suíte \"{i+1},\nΩ\"",
                 "city": f"City {i+1}" if not special_chars else f"City,{i+1}\n",
+                "zipcode": f"Zipcode {i+1}" if not special_chars else f"Zípcode \"{i+1},\nΩ\"",
+                "geo": {"lat": f"{i+1}.000", "lng": f"{-(i+1)}.000"} if not special_chars else {"lat": f"{i+1},\nΩ", "lng": f"{-(i+1)},\nΩ"},
             },
             "company": {
                 "name": f"Company {i+1}" if not special_chars else f"Compány \"{i+1},\nΩ\"",
+                "catchPhrase": f"CatchPhrase {i+1}" if not special_chars else f"CátchPhrase \"{i+1},\nΩ\"",
+                "bs": f"bs {i+1}" if not special_chars else f"bs \"{i+1},\nΩ\"",
             }
         }
         if missing_fields:
