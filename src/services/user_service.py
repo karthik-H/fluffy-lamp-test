@@ -5,7 +5,7 @@ Service layer for user-related business logic.
 from typing import List
 from src.domain.models import User
 from src.data.user_repository import UserRepository
-
+ 
 
 class UserService:
     """Service for user operations."""
