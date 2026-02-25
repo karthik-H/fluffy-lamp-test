@@ -111,7 +111,8 @@
           },
           "type": "edge"
         }
-      ]
+      ],
+      "test_path": ".codevalid/tests/task_3069521032_20240607200000/main_entrypoint_fetch_users.py"
     },
     {
       "implementation_id": "user_service_get_all_users",
@@ -200,7 +201,8 @@
           },
           "type": "positive"
         }
-      ]
+      ],
+      "test_path": ".codevalid/tests/task_3069521032_20240607200000/user_service_get_all_users.py"
     },
     {
       "implementation_id": "user_repository_fetch_all_users",
@@ -313,7 +315,8 @@
           },
           "type": "positive"
         }
-      ]
+      ],
+      "test_path": ".codevalid/tests/task_3069521032_20240607200000/user_repository_fetch_all_users.py"
     }
   ],
   "component": [],
