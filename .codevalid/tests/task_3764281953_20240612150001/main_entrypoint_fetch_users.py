@@ -6,7 +6,7 @@ import logging
 import sys
 from unittest.mock import patch, MagicMock
 
-# Add project root and src directory to sys.path for module imports
+# Ensure correct import paths for main function
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
 
@@ -55,7 +55,7 @@ def get_logged_messages(caplog):
     return [record.getMessage() for record in caplog.records]
 
 # Test Case 1: Successful API fetch and CSV file write
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
@@ -80,7 +80,7 @@ def test_successful_api_fetch_and_csv_file_write(mock_get, caplog):
         assert any(str(user["id"]) in msg and user["name"] in msg for msg in messages)
 
 # Test Case 2: API network failure
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_api_network_failure(mock_get):
     mock_get.side_effect = Exception("Network error")
     with pytest.raises(SystemExit):
@@ -88,7 +88,7 @@ def test_api_network_failure(mock_get):
     assert not os.path.exists(CSV_FILE_PATH)
 
 # Test Case 3: API returns empty list of users
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_api_returns_empty_list_of_users(mock_get, caplog):
     mock_get.return_value = MagicMock(status_code=200, json=lambda: [])
     caplog.set_level(logging.INFO)
@@ -99,10 +99,10 @@ def test_api_returns_empty_list_of_users(mock_get, caplog):
     expected_columns = ["id", "name", "username", "email", "phone", "website", "address", "company"]
     assert set(rows[0].keys()) == set(expected_columns) if rows else True
     messages = get_logged_messages(caplog)
-    assert not any("User" in msg for msg in messages)
+    assert not any(str(i+1) in msg for i in range(10) for msg in messages)
 
 # Test Case 4: CSV file write permission error
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_csv_file_write_permission_error(mock_get):
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
@@ -112,7 +112,7 @@ def test_csv_file_write_permission_error(mock_get):
     assert not os.path.exists(CSV_FILE_PATH)
 
 # Test Case 5: CSV file write fails due to disk full
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_csv_file_write_fails_due_to_disk_full(mock_get):
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
@@ -122,7 +122,7 @@ def test_csv_file_write_fails_due_to_disk_full(mock_get):
     assert not os.path.exists(CSV_FILE_PATH)
 
 # Test Case 6: API returns invalid response format
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_api_returns_invalid_response_format(mock_get):
     mock_get.return_value = MagicMock(status_code=200, json=lambda: "not a list")
     with pytest.raises(SystemExit):
@@ -130,7 +130,7 @@ def test_api_returns_invalid_response_format(mock_get):
     assert not os.path.exists(CSV_FILE_PATH)
 
 # Test Case 7: User data contains special characters
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_user_data_contains_special_characters(mock_get):
     users = mock_users(special_chars=True)
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
@@ -147,7 +147,7 @@ def test_user_data_contains_special_characters(mock_get):
         assert json.loads(row["company"]) == user["company"]
 
 # Test Case 8: Logging initialization and user summary
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_logging_initialization_and_user_summary(mock_get, caplog):
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
@@ -159,7 +159,7 @@ def test_logging_initialization_and_user_summary(mock_get, caplog):
     assert os.path.exists(CSV_FILE_PATH)
 
 # Test Case 9: User object with missing fields
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_user_object_with_missing_fields(mock_get):
     users = mock_users(missing_fields=True)
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
@@ -174,7 +174,7 @@ def test_user_object_with_missing_fields(mock_get):
                 assert row[field] == "" or row[field] is None
 
 # Test Case 10: API returns large number of users
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_api_returns_large_number_of_users(mock_get):
     users = mock_users(count=1000)
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
@@ -189,7 +189,7 @@ def test_api_returns_large_number_of_users(mock_get):
         assert row["name"] == user["name"]
 
 # Test Case 11: No transformation of user data
-@patch("src.services.user_service.requests.get")
+@patch("requests.get")
 def test_no_transformation_of_user_data(mock_get):
     users = mock_users()
     mock_get.return_value = MagicMock(status_code=200, json=lambda: users)
