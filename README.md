@@ -1,6 +1,6 @@
 # JSONPlaceholder User Fetcher
 
-A production-ready Python application to fetch user information from the [JSONPlaceholder API](https://jsonplaceholder.typicode.com/users), following clean architecture and industry best practices.
+A production-ready Python application to fetch user information from the [JSONPlaceholder API](https://jsonplaceholder.typicode.com/users), following clean architecture and industry best practices. 
 
 ---
 
