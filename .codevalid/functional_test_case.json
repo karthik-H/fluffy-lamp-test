@@ -4,319 +4,376 @@
       "implementation_id": "main_entrypoint_fetch_users",
       "test_cases": [
         {
-          "description": "Verify that main() successfully fetches all user records from the JSONPlaceholder /users endpoint when the API is accessible.",
-          "id": "TC01_fetch_all_users_success",
+          "description": "Verify that the application fetches all user records successfully when the JSONPlaceholder API is available and returns a complete response.",
+          "id": "TC1_successful_user_fetch",
           "implementation_id": "main_entrypoint_fetch_users",
-          "name": "fetch_all_users_success",
+          "name": "Successful fetch of all users from JSONPlaceholder",
           "test_setup": {
-            "given": "The script is run directly, and the JSONPlaceholder API is accessible and returns a valid user list.",
-            "then": "Logging is initialized, start of user data fetch is logged, UserService instance is created, get_all_users() sends an HTTP GET request to /users, all users are returned with no errors, the count matches the response, and user summaries are logged for each user.",
-            "when": "main() is executed."
+            "given": "JSONPlaceholder API is accessible and returns a valid list of user objects at /users.",
+            "then": "Logging shows start of fetch, successful retrieval, correct count of users, and logs of each user summary. No errors are reported.",
+            "when": "main() is executed as the entry point."
           },
           "type": "positive"
         },
         {
-          "description": "Check that main() reports a failure and does not proceed if the JSONPlaceholder API is unreachable.",
-          "id": "TC02_api_unreachable_error_handling",
+          "description": "Verify that the application properly reports a failure and does not proceed when the JSONPlaceholder API is unreachable.",
+          "id": "TC2_api_unreachable",
           "implementation_id": "main_entrypoint_fetch_users",
-          "name": "api_unreachable_error_handling",
+          "name": "API unreachable scenario",
           "test_setup": {
-            "given": "The script is run directly, and the JSONPlaceholder API endpoint is unreachable (e.g., network failure, DNS error, or server down).",
-            "then": "Error is logged/reported indicating the API is unreachable, no user data is fetched, and no user summaries are logged.",
-            "when": "main() is executed."
+            "given": "JSONPlaceholder API is down or network is unavailable.",
+            "then": "An error is logged indicating the API is unreachable, and no further processing or user summary logging occurs.",
+            "when": "main() is executed as the entry point."
           },
           "type": "negative"
         },
         {
-          "description": "Ensure main() handles a valid but empty list response from the API gracefully.",
-          "id": "TC03_empty_user_list",
+          "description": "Verify application behavior when the JSONPlaceholder API returns an empty user list.",
+          "id": "TC3_empty_user_list",
           "implementation_id": "main_entrypoint_fetch_users",
-          "name": "empty_user_list",
+          "name": "API returns empty user list",
           "test_setup": {
-            "given": "The script is run directly, and the JSONPlaceholder API is reachable but returns an empty list [].",
-            "then": "Logging is initialized, start of fetch is logged, user count is logged as 0, and no user summaries are logged.",
-            "when": "main() is executed."
+            "given": "JSONPlaceholder API is accessible but returns an empty list at /users.",
+            "then": "Logging shows start of fetch, zero users fetched, and does not attempt to log any user summaries. No errors are reported.",
+            "when": "main() is executed as the entry point."
           },
           "type": "edge"
         },
         {
-          "description": "Verify that main() handles a scenario where the API returns malformed JSON.",
-          "id": "TC04_api_returns_invalid_json",
+          "description": "Verify that the application handles unexpected exceptions thrown by UserService gracefully.",
+          "id": "TC4_partial_failure_in_user_service",
           "implementation_id": "main_entrypoint_fetch_users",
-          "name": "api_returns_invalid_json",
+          "name": "Internal error in UserService during fetch",
           "test_setup": {
-            "given": "The script is run directly, and the JSONPlaceholder API responds with invalid JSON data.",
-            "then": "An error is logged/reported about JSON parsing, no user data is processed, and the script does not crash.",
-            "when": "main() is executed."
+            "given": "UserService.get_all_users() raises an exception (e.g., parsing error, unexpected response).",
+            "then": "An error is logged with details of the exception. No user summaries are logged.",
+            "when": "main() is executed as the entry point."
           },
           "type": "negative"
         },
         {
-          "description": "Test that main() handles HTTP error responses (e.g., 404, 500) from the API.",
-          "id": "TC05_api_returns_unexpected_status_code",
+          "description": "Verify application behavior when the API returns malformed or invalid JSON.",
+          "id": "TC5_invalid_json_response",
           "implementation_id": "main_entrypoint_fetch_users",
-          "name": "api_returns_unexpected_status_code",
+          "name": "API returns invalid JSON",
           "test_setup": {
-            "given": "The script is run directly, and the JSONPlaceholder API returns an error status code (e.g. 404 Not Found, 500 Internal Server Error).",
-            "then": "An error is logged/reported about the unexpected status code, no user summaries are processed or logged.",
-            "when": "main() is executed."
+            "given": "JSONPlaceholder API /users endpoint returns a non-JSON or malformed JSON response.",
+            "then": "An error is logged indicating a JSON parsing failure. No user summaries are logged.",
+            "when": "main() is executed as the entry point."
           },
           "type": "negative"
         },
         {
-          "description": "Verify that main() is not executed if src/main.py is imported as a module, per Python best practices.",
-          "id": "TC06_script_imported_as_module",
+          "description": "Ensure that main() is not triggered when the script is imported as a module rather than run directly.",
+          "id": "TC6_not_run_as_entry_point",
           "implementation_id": "main_entrypoint_fetch_users",
-          "name": "script_imported_as_module",
+          "name": "Script imported as a module, main not executed",
           "test_setup": {
-            "given": "src/main.py is imported as a module (i.e., __name__ != '__main__').",
-            "then": "main() is not executed, no logging or network requests occur, and no side effects are observed.",
-            "when": "The import operation occurs."
+            "given": "src/main.py is imported from another module and not run as __main__.",
+            "then": "main() is not called. No logs related to user fetch or summaries are produced.",
+            "when": "Module is imported."
           },
           "type": "edge"
         },
         {
-          "description": "Confirm that main() does not filter, sort, or modify the user data returned from the API before logging.",
-          "id": "TC07_no_filter_sort_transform",
+          "description": "Test how the application handles fetching and logging a very large user dataset.",
+          "id": "TC7_large_number_of_users",
           "implementation_id": "main_entrypoint_fetch_users",
-          "name": "no_filter_sort_transform",
+          "name": "API returns a large number of users",
           "test_setup": {
-            "given": "The script is run directly, and the API returns a list of user objects in a specific order.",
-            "then": "The order and content of user data logged matches exactly the order and content received from the API, with no transformation applied.",
-            "when": "main() is executed."
-          },
-          "type": "positive"
-        },
-        {
-          "description": "Test main() with a large number of user records to ensure it handles large responses without error.",
-          "id": "TC08_large_user_list",
-          "implementation_id": "main_entrypoint_fetch_users",
-          "name": "large_user_list",
-          "test_setup": {
-            "given": "The script is run directly, and the API returns a large list (e.g., 1000 users).",
-            "then": "All users are processed and logged, and the count matches the response size without performance or memory issues.",
-            "when": "main() is executed."
+            "given": "JSONPlaceholder API returns a list of 1000+ user records at /users.",
+            "then": "Logging shows start, correct user count, and logs summaries for all users without error.",
+            "when": "main() is executed as the entry point."
           },
           "type": "edge"
         },
         {
-          "description": "Verify main() can handle user records with missing optional fields without crashing.",
-          "id": "TC09_partial_data_in_user",
+          "description": "Check that the application does not crash and logs user summaries even if some user records have missing or null fields.",
+          "id": "TC8_users_with_missing_fields",
           "implementation_id": "main_entrypoint_fetch_users",
-          "name": "partial_data_in_user",
+          "name": "API returns users with missing or null fields",
           "test_setup": {
-            "given": "The script is run directly, and the API returns user records where some optional fields are missing (e.g., no email or address).",
-            "then": "User summaries are logged for each user, handling missing fields gracefully without errors.",
-            "when": "main() is executed."
+            "given": "JSONPlaceholder API returns user records with some fields missing or null (e.g., missing email or username).",
+            "then": "User summaries are logged; missing fields are handled gracefully without exceptions.",
+            "when": "main() is executed as the entry point."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify that the application logs and handles HTTP error responses from /users endpoint.",
+          "id": "TC9_http_error_response",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "API returns HTTP error (e.g., 404, 500)",
+          "test_setup": {
+            "given": "JSONPlaceholder API /users endpoint returns HTTP 500 error.",
+            "then": "An error is logged with the HTTP status code, and no user summaries are produced.",
+            "when": "main() is executed as the entry point."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify application handles cases where /users returns a valid JSON object instead of a list.",
+          "id": "TC10_non_list_json_response",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "API returns valid JSON that is not a list",
+          "test_setup": {
+            "given": "JSONPlaceholder API /users endpoint returns a valid JSON object, not a list.",
+            "then": "An error or warning is logged indicating unexpected response format. No user summaries are logged.",
+            "when": "main() is executed as the entry point."
           },
           "type": "edge"
         }
-      ],
-      "test_path": ".codevalid/tests/task_3069521032_20240607200000/main_entrypoint_fetch_users.py"
+      ]
     },
     {
       "implementation_id": "user_service_get_all_users",
       "test_cases": [
         {
-          "description": "Verify that get_all_users() returns all user records when the JSONPlaceholder API is accessible and returns a complete user list.",
-          "id": "TC01_fetch_all_users_success",
+          "description": "Verify the function returns the complete list of users when the JSONPlaceholder API is available and returns a valid response.",
+          "id": "get_all_users_positive_success",
           "implementation_id": "user_service_get_all_users",
-          "name": "fetch_all_users_success",
+          "name": "Fetch all users successfully",
           "test_setup": {
-            "given": "JSONPlaceholder API is reachable and /users endpoint returns a valid array of 10 user records.",
-            "then": "A list of 10 user domain models matching the response from the API is returned. No error is raised.",
-            "when": "UserService.get_all_users() is called."
+            "given": "JSONPlaceholder API is reachable and returns a valid user list containing 10 user records.",
+            "then": "The function returns a list of 10 User domain model objects that exactly match the response from the API, with no filtering, sorting, or transformation.",
+            "when": "UserService.get_all_users() is called"
           },
           "type": "positive"
         },
         {
-          "description": "Verify that the function handles the scenario where the JSONPlaceholder API is unreachable.",
-          "id": "TC02_fetch_all_users_api_unreachable",
+          "description": "Ensure the function handles the case where the JSONPlaceholder API is unreachable, such as due to network errors or invalid endpoint.",
+          "id": "get_all_users_negative_api_unreachable",
           "implementation_id": "user_service_get_all_users",
-          "name": "fetch_all_users_api_unreachable",
+          "name": "API unreachable error handling",
           "test_setup": {
-            "given": "JSONPlaceholder API is not reachable due to network issues (e.g., connection timeout, DNS failure).",
-            "then": "An exception or failure is reported indicating the API is unreachable; no data is returned.",
-            "when": "UserService.get_all_users() is called."
+            "given": "JSONPlaceholder API is unreachable (e.g., network failure, DNS error, or endpoint returns timeout).",
+            "then": "The function raises a connection-related exception or returns an error indicating the API cannot be reached and does not proceed with further processing.",
+            "when": "UserService.get_all_users() is called"
           },
           "type": "negative"
         },
         {
-          "description": "Verify the function's behavior when the /users endpoint returns an empty list.",
-          "id": "TC03_fetch_all_users_empty_response",
+          "description": "Verify the function handles non-200 HTTP status codes from the API gracefully.",
+          "id": "get_all_users_negative_api_returns_error",
           "implementation_id": "user_service_get_all_users",
-          "name": "fetch_all_users_empty_response",
+          "name": "API returns HTTP error",
           "test_setup": {
-            "given": "JSONPlaceholder API is reachable but /users endpoint returns an empty array [].",
-            "then": "An empty list is returned. No error is raised.",
-            "when": "UserService.get_all_users() is called."
+            "given": "JSONPlaceholder API returns an HTTP 500 Internal Server Error.",
+            "then": "The function raises an exception or returns an error indicating the API returned an error response, and does not process any user records.",
+            "when": "UserService.get_all_users() is called"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Check the function's handling when the API returns an empty user list.",
+          "id": "get_all_users_edge_empty_list",
+          "implementation_id": "user_service_get_all_users",
+          "name": "API returns empty user list",
+          "test_setup": {
+            "given": "JSONPlaceholder API is available and returns an empty list (no users).",
+            "then": "The function returns an empty list.",
+            "when": "UserService.get_all_users() is called"
           },
           "type": "edge"
         },
         {
-          "description": "Verify that the function returns all records even if the API returns fewer than expected users.",
-          "id": "TC04_fetch_all_users_partial_data",
+          "description": "Verify the function handles a malformed JSON response from the API.",
+          "id": "get_all_users_negative_malformed_json",
           "implementation_id": "user_service_get_all_users",
-          "name": "fetch_all_users_partial_data",
+          "name": "API returns malformed JSON",
           "test_setup": {
-            "given": "JSONPlaceholder API is reachable and /users endpoint returns a valid array with only 1 user record.",
-            "then": "A list with 1 user domain model matching the API response is returned. No error is raised.",
-            "when": "UserService.get_all_users() is called."
+            "given": "JSONPlaceholder API is available but returns a malformed JSON response (e.g., incomplete object, invalid syntax).",
+            "then": "The function raises a JSON parsing error exception or returns an error indicating invalid/malformed JSON.",
+            "when": "UserService.get_all_users() is called"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Test the function's ability to handle large datasets efficiently and without errors.",
+          "id": "get_all_users_edge_large_user_list",
+          "implementation_id": "user_service_get_all_users",
+          "name": "API returns a large list of users",
+          "test_setup": {
+            "given": "JSONPlaceholder API is available and returns a list of 10000 user records.",
+            "then": "The function returns a list of 10000 User domain model objects matching the API response.",
+            "when": "UserService.get_all_users() is called"
           },
           "type": "edge"
         },
         {
-          "description": "Verify that the function handles HTTP error responses (e.g., 500 Internal Server Error) from the API.",
-          "id": "TC05_fetch_all_users_api_returns_error",
+          "description": "Check the function when the API returns exactly one user object in a list.",
+          "id": "get_all_users_edge_single_user",
           "implementation_id": "user_service_get_all_users",
-          "name": "fetch_all_users_api_returns_error",
+          "name": "API returns a single user",
           "test_setup": {
-            "given": "JSONPlaceholder API is reachable but /users endpoint returns a 500 Internal Server Error.",
-            "then": "An exception or error is reported indicating the API error; no data is returned.",
-            "when": "UserService.get_all_users() is called."
+            "given": "JSONPlaceholder API is available and returns a list with a single user record.",
+            "then": "The function returns a list containing exactly one User domain model matching the API response.",
+            "when": "UserService.get_all_users() is called"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Ensure the function's handling of user records with missing fields from the API.",
+          "id": "get_all_users_negative_partial_data",
+          "implementation_id": "user_service_get_all_users",
+          "name": "API returns incomplete user data",
+          "test_setup": {
+            "given": "JSONPlaceholder API is available and returns a list of users where some user objects are missing required fields (e.g., 'id' or 'name').",
+            "then": "The function raises a data validation exception or returns user objects with missing/None fields, depending on implementation.",
+            "when": "UserService.get_all_users() is called"
           },
           "type": "negative"
         },
         {
-          "description": "Verify the function's behavior when the API returns invalid JSON.",
-          "id": "TC06_fetch_all_users_api_returns_invalid_json",
+          "description": "Test the function if the API returns a valid JSON object instead of a list.",
+          "id": "get_all_users_negative_non_array_response",
           "implementation_id": "user_service_get_all_users",
-          "name": "fetch_all_users_api_returns_invalid_json",
+          "name": "API returns non-array JSON root",
           "test_setup": {
-            "given": "JSONPlaceholder API is reachable but /users endpoint returns malformed JSON.",
-            "then": "An exception or error is reported indicating JSON parsing failure; no data is returned.",
-            "when": "UserService.get_all_users() is called."
+            "given": "JSONPlaceholder API is available but returns a JSON object (not a list/array) as the root response.",
+            "then": "The function raises a data type exception or returns an error indicating unexpected response format.",
+            "when": "UserService.get_all_users() is called"
           },
           "type": "negative"
         },
         {
-          "description": "Verify that the function does not filter, sort, or transform the user data and returns it as-is.",
-          "id": "TC07_fetch_all_users_data_not_transformed",
+          "description": "Ensure the function does not filter, sort, or transform the user data received from the API.",
+          "id": "get_all_users_positive_no_modification",
           "implementation_id": "user_service_get_all_users",
-          "name": "fetch_all_users_data_not_transformed",
+          "name": "No modification of fetched user data",
           "test_setup": {
-            "given": "JSONPlaceholder API is reachable and /users endpoint returns users in a specific unsorted order.",
-            "then": "The returned list of user domain models is in the same order and structure as the received API response.",
-            "when": "UserService.get_all_users() is called."
+            "given": "JSONPlaceholder API returns a user list with users in a specific order and with exact original field values.",
+            "then": "The function returns the list in the same order and with the same values as received from the API (i.e., no alteration).",
+            "when": "UserService.get_all_users() is called"
           },
           "type": "positive"
         }
-      ],
-      "test_path": ".codevalid/tests/task_3069521032_20240607200000/user_service_get_all_users.py"
+      ]
     },
     {
       "implementation_id": "user_repository_fetch_all_users",
       "test_cases": [
         {
-          "description": "Verifies that the function successfully retrieves and returns all user records when the JSONPlaceholder API is accessible and returns a valid response.",
-          "id": "TC1_fetch_all_users_success",
+          "description": "Verify that all user records are retrieved successfully when the JSONPlaceholder API is accessible and returns a valid response.",
+          "id": "fetch_all_users_success",
           "implementation_id": "user_repository_fetch_all_users",
-          "name": "fetch_all_users_returns_all_users_successfully",
+          "name": "test_fetch_all_users_success",
           "test_setup": {
-            "given": "The JSONPlaceholder API is reachable and responds to /users GET requests with a valid list of user objects.",
-            "then": "A list of User domain models corresponding to all users in the API response is returned. No error is raised.",
+            "given": "JSONPlaceholder API is reachable and /users endpoint responds with a valid user list.",
+            "then": "Returns a list of User domain models with all user records from the API.",
             "when": "UserRepository.fetch_all_users() is called."
           },
           "type": "positive"
         },
         {
-          "description": "Verifies that the function raises an error when the JSONPlaceholder API is unreachable (e.g., network error, DNS failure).",
-          "id": "TC2_fetch_all_users_api_unreachable",
+          "description": "Ensure the function handles the scenario where the JSONPlaceholder API is unreachable (e.g., network failure, DNS failure, timeout) and reports the error.",
+          "id": "fetch_all_users_api_unreachable",
           "implementation_id": "user_repository_fetch_all_users",
-          "name": "fetch_all_users_handles_api_unreachable",
+          "name": "test_fetch_all_users_api_unreachable",
           "test_setup": {
-            "given": "The JSONPlaceholder API is unreachable due to network failure or DNS issues.",
-            "then": "An exception is raised indicating the API could not be reached. No user list is returned.",
+            "given": "JSONPlaceholder API is unreachable due to network error.",
+            "then": "Function raises an appropriate error or exception indicating the API is unreachable.",
             "when": "UserRepository.fetch_all_users() is called."
           },
           "type": "negative"
         },
         {
-          "description": "Verifies that the function raises an error if the API responds with an HTTP error status (e.g., 500, 404).",
-          "id": "TC3_fetch_all_users_api_returns_error_status",
+          "description": "Check that the function raises an error when the API responds with a non-2xx HTTP status code (e.g., 404, 500).",
+          "id": "fetch_all_users_http_error",
           "implementation_id": "user_repository_fetch_all_users",
-          "name": "fetch_all_users_handles_api_error_status",
+          "name": "test_fetch_all_users_http_error",
           "test_setup": {
-            "given": "The JSONPlaceholder API responds to /users GET with an error status code (e.g., 500 Internal Server Error).",
-            "then": "An exception is raised indicating the request failed due to the HTTP error. No user list is returned.",
+            "given": "JSONPlaceholder API /users endpoint responds with HTTP 500 Internal Server Error.",
+            "then": "Function raises an HTTP error indicating the request failed.",
             "when": "UserRepository.fetch_all_users() is called."
           },
           "type": "negative"
         },
         {
-          "description": "Verifies that the function correctly handles the case where the API returns an empty list of users.",
-          "id": "TC4_fetch_all_users_empty_user_list",
+          "description": "Verify that the function returns an empty list when the API returns an empty user list.",
+          "id": "fetch_all_users_empty_list",
           "implementation_id": "user_repository_fetch_all_users",
-          "name": "fetch_all_users_handles_empty_user_list",
+          "name": "test_fetch_all_users_empty_list",
           "test_setup": {
-            "given": "The JSONPlaceholder API responds with a 200 status and an empty list [].",
-            "then": "An empty list is returned. No error is raised.",
+            "given": "JSONPlaceholder API /users endpoint responds with an empty list [].",
+            "then": "Returns an empty list.",
             "when": "UserRepository.fetch_all_users() is called."
           },
           "type": "edge"
         },
         {
-          "description": "Verifies that the function raises an error if the API returns malformed or invalid JSON.",
-          "id": "TC5_fetch_all_users_malformed_json_response",
+          "description": "Ensure that the function raises an error when the API returns invalid (non-JSON) response.",
+          "id": "fetch_all_users_invalid_json_response",
           "implementation_id": "user_repository_fetch_all_users",
-          "name": "fetch_all_users_handles_malformed_json_response",
+          "name": "test_fetch_all_users_invalid_json_response",
           "test_setup": {
-            "given": "The JSONPlaceholder API returns a 200 response with malformed or invalid JSON.",
-            "then": "An exception is raised indicating a JSON parsing error. No user list is returned.",
+            "given": "JSONPlaceholder API /users endpoint responds with non-JSON or malformed JSON data.",
+            "then": "Function raises a JSON parse error.",
             "when": "UserRepository.fetch_all_users() is called."
           },
           "type": "negative"
         },
         {
-          "description": "Verifies that the function handles user records with missing or null fields in the response gracefully.",
-          "id": "TC6_fetch_all_users_partial_user_fields",
+          "description": "Ensure the function raises an error if a user record in the response cannot be parsed into the User domain model due to missing required fields.",
+          "id": "fetch_all_users_invalid_user_object",
           "implementation_id": "user_repository_fetch_all_users",
-          "name": "fetch_all_users_handles_partial_user_fields",
+          "name": "test_fetch_all_users_invalid_user_object",
           "test_setup": {
-            "given": "The JSONPlaceholder API returns a 200 response with a user object missing some expected fields.",
-            "then": "The function either returns User domain models with default values for missing fields or raises a descriptive error, according to the User model's contract.",
-            "when": "UserRepository.fetch_all_users() is called."
-          },
-          "type": "edge"
-        },
-        {
-          "description": "Verifies that the function raises an error if the JSON response is not a list (e.g., a dict or primitive).",
-          "id": "TC7_fetch_all_users_unexpected_response_type",
-          "implementation_id": "user_repository_fetch_all_users",
-          "name": "fetch_all_users_handles_unexpected_response_type",
-          "test_setup": {
-            "given": "The JSONPlaceholder API returns a 200 response with a JSON object (dict) instead of a list.",
-            "then": "An exception is raised indicating the response type is unexpected.",
+            "given": "JSONPlaceholder API /users endpoint responds with a list containing a user object missing required fields.",
+            "then": "Function raises a parsing or validation error for the invalid user object.",
             "when": "UserRepository.fetch_all_users() is called."
           },
           "type": "negative"
         },
         {
-          "description": "Verifies that the function can handle and return a large list of user objects without performance degradation or errors.",
-          "id": "TC8_fetch_all_users_large_number_of_users",
+          "description": "Validate that if the API returns a mix of valid and invalid user objects, the function fails with an error and does not return a partial list.",
+          "id": "fetch_all_users_partial_user_records",
           "implementation_id": "user_repository_fetch_all_users",
-          "name": "fetch_all_users_handles_large_user_list",
+          "name": "test_fetch_all_users_partial_user_records",
           "test_setup": {
-            "given": "The JSONPlaceholder API returns a 200 response with a large list (e.g., 10,000) of user objects.",
-            "then": "A list of 10,000 User domain models is returned. No error is raised.",
+            "given": "JSONPlaceholder API /users endpoint responds with a list containing valid and invalid user objects.",
+            "then": "Function raises an error rather than returning a partial list.",
             "when": "UserRepository.fetch_all_users() is called."
           },
-          "type": "edge"
+          "type": "negative"
         },
         {
-          "description": "Verifies that the function does not filter, sort, or transform the retrieved user data and returns all fields as received.",
-          "id": "TC9_fetch_all_users_data_not_transformed",
+          "description": "Ensure that the function returns user records exactly as received from the API, with no filtering, sorting, or transformation.",
+          "id": "fetch_all_users_no_filtering_or_sorting",
           "implementation_id": "user_repository_fetch_all_users",
-          "name": "fetch_all_users_does_not_transform_data",
+          "name": "test_fetch_all_users_no_filtering_or_sorting",
           "test_setup": {
-            "given": "The JSONPlaceholder API returns a 200 response with a list of user objects containing various fields.",
-            "then": "The function returns users with all fields present and in the order and structure received from the API, with no filtering or transformation.",
+            "given": "JSONPlaceholder API /users endpoint returns a list of user objects in a specific order.",
+            "then": "Returns user records in the same order and with the same data as the API response.",
             "when": "UserRepository.fetch_all_users() is called."
           },
           "type": "positive"
+        },
+        {
+          "description": "Test the function's ability to handle large responses by simulating a large list of user objects.",
+          "id": "fetch_all_users_large_number_of_users",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_large_number_of_users",
+          "test_setup": {
+            "given": "JSONPlaceholder API /users endpoint responds with a list of 1000 user objects.",
+            "then": "Returns a list of 1000 User domain models.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Ensure the function handles slow API responses gracefully, either by waiting for the response or timing out as configured.",
+          "id": "fetch_all_users_slow_response",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_slow_response",
+          "test_setup": {
+            "given": "JSONPlaceholder API /users endpoint responds after a significant delay.",
+            "then": "Function either returns the expected list after waiting or raises a timeout error if one is configured.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "edge"
         }
-      ],
-      "test_path": ".codevalid/tests/task_3069521032_20240607200000/user_repository_fetch_all_users.py"
+      ]
     }
   ],
   "component": [],
