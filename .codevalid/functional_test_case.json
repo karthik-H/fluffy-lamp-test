@@ -122,9 +122,56 @@
             "when": "main() is executed as the entry point."
           },
           "type": "edge"
+        },
+        {
+          "description": "Verify the application logs an error when the /users request times out.",
+          "id": "API_request_timeout",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "API request timeout",
+          "test_setup": {
+            "given": "The request to JSONPlaceholder /users endpoint exceeds the timeout threshold.",
+            "then": "A timeout error is logged and no user summaries are processed.",
+            "when": "main() is executed as the entry point."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Ensure the application ignores extra fields and logs expected user fields only.",
+          "id": "API_returns_additional_unexpected_fields",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "API returns additional unexpected fields",
+          "test_setup": {
+            "given": "JSONPlaceholder API returns user records with additional non-standard fields.",
+            "then": "Application logs only the expected fields without error or transformation.",
+            "when": "main() is executed as the entry point."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify that the application logs summaries even when fields have unexpected data types.",
+          "id": "User_fields_with_incorrect_data_types",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "User fields with incorrect data types",
+          "test_setup": {
+            "given": "API returns users where fields such as id, username, or email have incorrect data types.",
+            "then": "User summaries are logged without crashing, using the raw values.",
+            "when": "main() is executed as the entry point."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify main() handles logging initialization errors.",
+          "id": "Logging_initialization_failure",
+          "implementation_id": "main_entrypoint_fetch_users",
+          "name": "Logging initialization failure",
+          "test_setup": {
+            "given": "Logging initialization raises an exception (e.g., invalid file path).",
+            "then": "Application logs an initialization error and stops execution before fetching users.",
+            "when": "main() is executed."
+          },
+          "type": "negative"
         }
-      ],
-      "test_path": ".codevalid/tests/task_3069521032_20240607200000/main_entrypoint_fetch_users.py"
+      ]
     },
     {
       "implementation_id": "user_service_get_all_users",
@@ -248,9 +295,68 @@
             "when": "UserService.get_all_users() is called"
           },
           "type": "positive"
+        },
+        {
+          "description": "Verify UserService uses a provided UserRepository instance instead of creating a new one.",
+          "id": "Dependency_injection_with_custom_repository",
+          "implementation_id": "user_service_get_all_users",
+          "name": "Dependency injection with custom repository",
+          "test_setup": {
+            "given": "A mock UserRepository is injected into UserService and its fetch_all_users() returns a list of 3 mock users.",
+            "then": "The function returns exactly the list provided by the injected repository.",
+            "when": "UserService.get_all_users() is called"
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Ensure unexpected repository-level errors propagate correctly.",
+          "id": "Repository_fetch_raises_unexpected_exception",
+          "implementation_id": "user_service_get_all_users",
+          "name": "Repository fetch raises unexpected exception",
+          "test_setup": {
+            "given": "Injected UserRepository.fetch_all_users() raises an unexpected exception (e.g., RuntimeError).",
+            "then": "The exception is propagated upward without modification.",
+            "when": "UserService.get_all_users() is called"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Ensure function handles incorrect repository return type.",
+          "id": "Repository_returns_None_instead_of_list",
+          "implementation_id": "user_service_get_all_users",
+          "name": "Repository returns None instead of list",
+          "test_setup": {
+            "given": "Injected UserRepository.fetch_all_users() returns None.",
+            "then": "The function raises a type or validation exception indicating unexpected None response.",
+            "when": "UserService.get_all_users() is called"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify that UserService.__init__ prints 'test' as defined in pseudocode.",
+          "id": "Service_initialization_prints_test",
+          "implementation_id": "user_service_get_all_users",
+          "name": "Service initialization prints test",
+          "test_setup": {
+            "given": "UserService is instantiated.",
+            "then": "Output contains the string 'test'.",
+            "when": "Constructor runs"
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Verify UserService creates a new UserRepository instance when none is injected.",
+          "id": "Default_repository_creation_when_none_supplied",
+          "implementation_id": "user_service_get_all_users",
+          "name": "Default repository creation when none supplied",
+          "test_setup": {
+            "given": "UserService instantiated without parameters.",
+            "then": "Repository calls succeed using an internally created UserRepository instance.",
+            "when": "get_all_users() is called"
+          },
+          "type": "positive"
         }
-      ],
-      "test_path": ".codevalid/tests/task_3069521032_20240607200000/user_service_get_all_users.py"
+      ]
     },
     {
       "implementation_id": "user_repository_fetch_all_users",
@@ -374,9 +480,603 @@
             "when": "UserRepository.fetch_all_users() is called."
           },
           "type": "edge"
+        },
+        {
+          "description": "Verify URL is constructed using base_url and users_endpoint from Config.",
+          "id": "test_fetch_all_users_url_construction",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_url_construction",
+          "test_setup": {
+            "given": "Valid Config values for base_url and users_endpoint.",
+            "then": "GET request is sent to base_url + users_endpoint exactly.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Ensure timeout of 10 seconds is applied to the GET request.",
+          "id": "test_fetch_all_users_timeout_enforced",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_timeout_enforced",
+          "test_setup": {
+            "given": "API does not respond within 10 seconds.",
+            "then": "Function raises a timeout error.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Ensure error is raised when API returns a JSON object instead of expected list.",
+          "id": "test_fetch_all_users_non_list_root",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_non_list_root",
+          "test_setup": {
+            "given": "API returns a JSON object instead of a list.",
+            "then": "Error is raised due to invalid response format.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Ensure error is raised when API returns null.",
+          "id": "test_fetch_all_users_null_response",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_null_response",
+          "test_setup": {
+            "given": "API returns null as JSON.",
+            "then": "Function raises parsing or type error.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Ensure extra unexpected fields in user object do not break parsing.",
+          "id": "test_fetch_all_users_extra_fields_ignored",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_extra_fields_ignored",
+          "test_setup": {
+            "given": "API returns valid user objects with additional fields.",
+            "then": "Parsing succeeds and extra fields are ignored.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Ensure error is raised when API returns empty objects for users.",
+          "id": "test_fetch_all_users_empty_user_object",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_empty_user_object",
+          "test_setup": {
+            "given": "API returns [{}].",
+            "then": "Function raises parsing error.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Ensure repository respects overridden base_url and endpoint values.",
+          "id": "test_fetch_all_users_config_override",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_config_override",
+          "test_setup": {
+            "given": "Custom base_url and endpoint passed to UserRepository.",
+            "then": "GET request uses overridden values.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Simulate connection reset during response.",
+          "id": "test_fetch_all_users_network_reset_midstream",
+          "implementation_id": "user_repository_fetch_all_users",
+          "name": "test_fetch_all_users_network_reset_midstream",
+          "test_setup": {
+            "given": "Connection drops mid-response.",
+            "then": "Function raises appropriate connection error.",
+            "when": "UserRepository.fetch_all_users() is called."
+          },
+          "type": "negative"
         }
-      ],
-      "test_path": ".codevalid/tests/task_3069521032_20240607200000/user_repository_fetch_all_users.py"
+      ]
+    },
+    {
+      "implementation_id": "config",
+      "test_cases": [
+        {
+          "description": "Verify that Config loads both environment variables when they are explicitly defined.",
+          "id": "load_config_with_all_env_vars_set",
+          "implementation_id": "config",
+          "name": "load_config_with_all_env_vars_set",
+          "test_setup": {
+            "given": "Environment variables JSONPLACEHOLDER_BASE_URL='https://custom-api.com' and JSONPLACEHOLDER_USERS_ENDPOINT='/custom-users' are set.",
+            "then": "Config.JSONPLACEHOLDER_BASE_URL should equal 'https://custom-api.com' and Config.JSONPLACEHOLDER_USERS_ENDPOINT should equal '/custom-users'.",
+            "when": "The Config class is initialized."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Verify that Config falls back to default values when environment variables are missing.",
+          "id": "load_config_with_no_env_vars_set",
+          "implementation_id": "config",
+          "name": "load_config_with_no_env_vars_set",
+          "test_setup": {
+            "given": "No environment variables are set.",
+            "then": "Config.JSONPLACEHOLDER_BASE_URL should default to 'https://jsonplaceholder.typicode.com' and Config.JSONPLACEHOLDER_USERS_ENDPOINT should default to '/users'.",
+            "when": "The Config class is initialized."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Verify fallback to default endpoint when only JSONPLACEHOLDER_BASE_URL is set.",
+          "id": "load_config_with_only_base_url_set",
+          "implementation_id": "config",
+          "name": "load_config_with_only_base_url_set",
+          "test_setup": {
+            "given": "Environment variable JSONPLACEHOLDER_BASE_URL='https://custom-api.com' is set but JSONPLACEHOLDER_USERS_ENDPOINT is missing.",
+            "then": "Config.JSONPLACEHOLDER_BASE_URL should equal 'https://custom-api.com' and Config.JSONPLACEHOLDER_USERS_ENDPOINT should default to '/users'.",
+            "when": "The Config class is initialized."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Verify fallback to default base URL when only JSONPLACEHOLDER_USERS_ENDPOINT is set.",
+          "id": "load_config_with_only_users_endpoint_set",
+          "implementation_id": "config",
+          "name": "load_config_with_only_users_endpoint_set",
+          "test_setup": {
+            "given": "Environment variable JSONPLACEHOLDER_USERS_ENDPOINT='/custom-users' is set but JSONPLACEHOLDER_BASE_URL is missing.",
+            "then": "Config.JSONPLACEHOLDER_BASE_URL should default to 'https://jsonplaceholder.typicode.com' and Config.JSONPLACEHOLDER_USERS_ENDPOINT should equal '/custom-users'.",
+            "when": "The Config class is initialized."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Verify that .env file values override defaults.",
+          "id": "load_config_with_env_file_present",
+          "implementation_id": "config",
+          "name": "load_config_with_env_file_present",
+          "test_setup": {
+            "given": ".env file contains JSONPLACEHOLDER_BASE_URL='https://env-api.com' and JSONPLACEHOLDER_USERS_ENDPOINT='/env-users'.",
+            "then": "Config fields should reflect the .env values.",
+            "when": "The Config class loads environment variables."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Verify behavior when .env file is absent.",
+          "id": "load_config_with_env_file_missing",
+          "implementation_id": "config",
+          "name": "load_config_with_env_file_missing",
+          "test_setup": {
+            "given": ".env file does not exist and no environment variables are set.",
+            "then": "Config should load default values without raising errors.",
+            "when": "The Config class loads environment variables."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify that empty strings are treated as set values, not defaults.",
+          "id": "load_config_with_empty_env_values",
+          "implementation_id": "config",
+          "name": "load_config_with_empty_env_values",
+          "test_setup": {
+            "given": "Environment variables JSONPLACEHOLDER_BASE_URL='' and JSONPLACEHOLDER_USERS_ENDPOINT='' are set.",
+            "then": "Config values should be empty strings, not defaults.",
+            "when": "The Config class is initialized."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Verify behavior when the base URL contains invalid format.",
+          "id": "load_config_with_invalid_url_format",
+          "implementation_id": "config",
+          "name": "load_config_with_invalid_url_format",
+          "test_setup": {
+            "given": "Environment variable JSONPLACEHOLDER_BASE_URL='not-a-valid-url' is set.",
+            "then": "Config.JSONPLACEHOLDER_BASE_URL should equal 'not-a-valid-url' but downstream API calls would fail; Config should not validate or reject it.",
+            "when": "The Config class is initialized."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify endpoint behavior if missing expected format.",
+          "id": "load_config_with_missing_leading_slash_in_endpoint",
+          "implementation_id": "config",
+          "name": "load_config_with_missing_leading_slash_in_endpoint",
+          "test_setup": {
+            "given": "Environment variable JSONPLACEHOLDER_USERS_ENDPOINT='users' (no leading slash).",
+            "then": "Config.JSONPLACEHOLDER_USERS_ENDPOINT should equal 'users'. No automatic correction occurs.",
+            "when": "The Config class loads environment variables."
+          },
+          "type": "edge"
+        },
+        {
+          "description": "System-level validation that correct Config values allow a proper request to JSONPlaceholder.",
+          "id": "fetch_users_with_valid_config",
+          "implementation_id": "config",
+          "name": "fetch_users_with_valid_config",
+          "test_setup": {
+            "given": "Config uses default values and API is reachable.",
+            "then": "A GET request is sent to 'https://jsonplaceholder.typicode.com/users' and full user list is returned.",
+            "when": "Application calls fetch-all-users logic."
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Verify application behavior when API is not reachable.",
+          "id": "fetch_users_with_unreachable_api",
+          "implementation_id": "config",
+          "name": "fetch_users_with_unreachable_api",
+          "test_setup": {
+            "given": "Config values are valid but API domain cannot be reached.",
+            "then": "Application reports connection failure and does not proceed further.",
+            "when": "Application requests user list."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Verify system behavior when base URL and endpoint combine into malformed URL.",
+          "id": "fetch_users_with_malformed_combined_url",
+          "implementation_id": "config",
+          "name": "fetch_users_with_malformed_combined_url",
+          "test_setup": {
+            "given": "JSONPLACEHOLDER_BASE_URL='https://api.com////' and JSONPLACEHOLDER_USERS_ENDPOINT='////users'.",
+            "then": "Final URL becomes malformed; API request fails and application must report failure.",
+            "when": "Application constructs API URL."
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Validate behavior with boundary-length environment variables.",
+          "id": "fetch_users_with_extremely_long_env_values",
+          "implementation_id": "config",
+          "name": "fetch_users_with_extremely_long_env_values",
+          "test_setup": {
+            "given": "JSONPLACEHOLDER_BASE_URL is a very long string (e.g., 5000 characters).",
+            "then": "Config should accept the value without truncation, but API call may fail due to invalid URL.",
+            "when": "Config loads environment variables."
+          },
+          "type": "edge"
+        }
+      ]
+    },
+    {
+      "implementation_id": "userrepository_parse_user",
+      "test_cases": [
+        {
+          "description": "Parses a fully populated and valid user JSON dict into User, Address, and Company domain objects",
+          "id": "parse_user_happy_path_full_valid_data",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_happy_path_full_valid_data",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "address": {
+                  "city": "Gwenborough",
+                  "geo": {
+                    "lat": "-37.3159",
+                    "lng": "81.1496"
+                  },
+                  "street": "Kulas Light",
+                  "suite": "Apt. 556",
+                  "zipcode": "92998-3874"
+                },
+                "company": {
+                  "bs": "harness real-time e-markets",
+                  "catchPhrase": "Multi-layered client-server neural-net",
+                  "name": "Romaguera-Crona"
+                },
+                "email": "john@example.com",
+                "id": 1,
+                "name": "John Doe",
+                "phone": "1-770-736-8031 x56442",
+                "username": "jdoe",
+                "website": "hildegard.org"
+              }
+            },
+            "then": "A User object is returned with all fields mapped exactly from the input",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "positive"
+        },
+        {
+          "description": "Handles missing optional fields inside the address object if the domain model permits nulls",
+          "id": "parse_user_missing_optional_fields_in_address",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_missing_optional_fields_in_address",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "address": {
+                  "city": "Wisokyburgh",
+                  "geo": {
+                    "lat": "43.9509",
+                    "lng": "-34.4618"
+                  },
+                  "street": "Victor Plains",
+                  "suite": null,
+                  "zipcode": "90566-7771"
+                },
+                "company": {
+                  "bs": "synergize scalable supply-chains",
+                  "catchPhrase": "Proactive didactic contingency",
+                  "name": "Deckow-Crist"
+                },
+                "email": "jane@example.com",
+                "id": 2,
+                "name": "Jane Doe",
+                "phone": "010-692-6593 x09125",
+                "username": "jane",
+                "website": "anastasia.net"
+              }
+            },
+            "then": "A User object is returned with missing fields represented as null where applicable",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Validates behavior when the entire address block is missing",
+          "id": "parse_user_missing_address_block",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_missing_address_block",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "company": {
+                  "bs": "business stuff",
+                  "catchPhrase": "Test phrase",
+                  "name": "ABC Corp"
+                },
+                "email": "nouseraddress@example.com",
+                "id": 3,
+                "name": "Missing Address User",
+                "phone": "1-463-123-4447",
+                "username": "nouseraddress",
+                "website": "example.com"
+              }
+            },
+            "then": "Function raises a KeyError or equivalent exception due to missing address",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Validates behavior when the entire company block is missing",
+          "id": "parse_user_missing_company_block",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_missing_company_block",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "address": {
+                  "city": "McKenziehaven",
+                  "geo": {
+                    "lat": "-68.6102",
+                    "lng": "-47.0653"
+                  },
+                  "street": "Douglas Extension",
+                  "suite": "Suite 847",
+                  "zipcode": "59590-4157"
+                },
+                "email": "nousercompany@example.com",
+                "id": 4,
+                "name": "Missing Company User",
+                "phone": "493-170-9623 x156",
+                "username": "nousercompany",
+                "website": "example.org"
+              }
+            },
+            "then": "Function raises a KeyError or equivalent exception due to missing company",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Handles null geo values if domain model allows them",
+          "id": "parse_user_null_geo_coordinates",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_null_geo_coordinates",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "address": {
+                  "city": "Testville",
+                  "geo": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "street": "Main St",
+                  "suite": "Suite 1",
+                  "zipcode": "12345"
+                },
+                "company": {
+                  "bs": "run tests",
+                  "catchPhrase": "Testing the world",
+                  "name": "XYZ Industries"
+                },
+                "email": "nullgeo@example.com",
+                "id": 5,
+                "name": "Null Geo User",
+                "phone": "493-170-9623",
+                "username": "nullgeo",
+                "website": "some-site.com"
+              }
+            },
+            "then": "User object is returned with geo fields set to null",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Fails when fields have invalid data types",
+          "id": "parse_user_invalid_data_types",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_invalid_data_types",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "address": "this-should-be-an-object",
+                "company": 123,
+                "email": [
+                  "invalid"
+                ],
+                "id": "not-a-number",
+                "name": 123,
+                "phone": 999999,
+                "username": false,
+                "website": {}
+              }
+            },
+            "then": "Function raises an exception due to invalid types",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Parses user object where fields are empty strings",
+          "id": "parse_user_empty_strings",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_empty_strings",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "address": {
+                  "city": "",
+                  "geo": {
+                    "lat": "",
+                    "lng": ""
+                  },
+                  "street": "",
+                  "suite": "",
+                  "zipcode": ""
+                },
+                "company": {
+                  "bs": "",
+                  "catchPhrase": "",
+                  "name": ""
+                },
+                "email": "",
+                "id": 6,
+                "name": "",
+                "phone": "",
+                "username": "",
+                "website": ""
+              }
+            },
+            "then": "User object is returned with empty string fields preserved",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Handles extremely large numeric values for id",
+          "id": "parse_user_large_numeric_ids",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_large_numeric_ids",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "address": {
+                  "city": "Metropolis",
+                  "geo": {
+                    "lat": "0",
+                    "lng": "0"
+                  },
+                  "street": "Wide Street",
+                  "suite": "99",
+                  "zipcode": "00000"
+                },
+                "company": {
+                  "bs": "big business",
+                  "catchPhrase": "Big things",
+                  "name": "Big Corp"
+                },
+                "email": "bigid@example.com",
+                "id": 999999999999,
+                "name": "Big ID User",
+                "phone": "12345",
+                "username": "bigid",
+                "website": "big.com"
+              }
+            },
+            "then": "User object is returned with the large id preserved",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "edge"
+        },
+        {
+          "description": "Tests behavior when geo object is present but missing lat or lng",
+          "id": "parse_user_nested_geo_missing_fields",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_nested_geo_missing_fields",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "address": {
+                  "city": "Geo City",
+                  "geo": {
+                    "lat": "-10.000"
+                  },
+                  "street": "Geo St",
+                  "suite": "1",
+                  "zipcode": "99999"
+                },
+                "company": {
+                  "bs": "geo services",
+                  "catchPhrase": "Mapping the world",
+                  "name": "Geo Corp"
+                },
+                "email": "missing@example.com",
+                "id": 7,
+                "name": "Geo Missing Fields",
+                "phone": "98765",
+                "username": "geomissing",
+                "website": "missing.com"
+              }
+            },
+            "then": "Function raises a KeyError due to missing lng field",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "negative"
+        },
+        {
+          "description": "Tests behavior when all fields exist but are null",
+          "id": "parse_user_all_fields_null",
+          "implementation_id": "userrepository_parse_user",
+          "name": "parse_user_all_fields_null",
+          "test_setup": {
+            "given": {
+              "input_data": {
+                "address": {
+                  "city": null,
+                  "geo": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "street": null,
+                  "suite": null,
+                  "zipcode": null
+                },
+                "company": {
+                  "bs": null,
+                  "catchPhrase": null,
+                  "name": null
+                },
+                "email": null,
+                "id": null,
+                "name": null,
+                "phone": null,
+                "username": null,
+                "website": null
+              }
+            },
+            "then": "User object is returned with all null values",
+            "when": "UserRepository._parse_user(input_data) is called"
+          },
+          "type": "edge"
+        }
+      ]
     }
   ],
   "component": [],
