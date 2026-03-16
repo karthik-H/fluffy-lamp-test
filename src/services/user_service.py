@@ -11,6 +11,7 @@ class UserService:
     """Service for user operations."""
 
     def __init__(self, user_repository: UserRepository = None):
+        print("test")
         self.user_repository = user_repository or UserRepository()
 
     def get_all_users(self) -> List[User]:

@@ -33,33 +33,48 @@
   "task_3069521032_20240607200000": {
     "implementation": [
       {
-        "How_is_it_connected_to_implementation": "Entry point of the application; initiates the process to fetch all user records from JSONPlaceholder by invoking the UserService.",
-        "change_type": "unchanged",
+        "How_is_it_connected_to_implementation": "Entry point of the application; initiates the process to fetch all user records from JSONPlaceholder by invoking the UserService and logs each user's id, name, username, email, phone, and website fields.",
         "file_path": "src/main.py",
         "id": "main_entrypoint_fetch_users",
         "name": "main()",
-        "pseudo_code": "IF script is run directly:\n    Initialize logging\n    Log start of user data fetch\n    Create UserService instance\n    Call get_all_users() to fetch users\n    Log number of users fetched\n    FOR each user in users:\n        Log user summary",
+        "pseudo_code": "IF script is run directly:\n    Initialize logging with INFO level and timestamp format\n    Log start of user data fetch\n    Create UserService instance\n    Call get_all_users() to fetch users\n    Log number of users fetched\n    FOR each user in users:\n        Log user id, name, username, email, phone, website",
         "type": "function"
       },
       {
-        "How_is_it_connected_to_implementation": "Service layer function called by main(); delegates fetching user records to the UserRepository.",
-        "change_type": "unchanged",
+        "How_is_it_connected_to_implementation": "Service layer function called by main(); accepts an optional UserRepository via dependency injection in __init__ (defaulting to a new UserRepository instance), and delegates fetching user records to the UserRepository.",
         "file_path": "src/services/user_service.py",
         "id": "user_service_get_all_users",
         "name": "UserService.get_all_users()",
-        "pseudo_code": "Call fetch_all_users() on UserRepository\nReturn list of User domain models",
+        "pseudo_code": "INIT UserService:\n    Print 'test'\n    IF user_repository is provided:\n        Use provided user_repository\n    ELSE:\n        Create new UserRepository instance\n\nget_all_users():\n    Call fetch_all_users() on user_repository\n    Return list of User domain models",
         "type": "function"
       },
       {
-        "How_is_it_connected_to_implementation": "Repository function responsible for connecting to the JSONPlaceholder API and retrieving all user records from the /users endpoint.",
-        "change_type": "unchanged",
+        "How_is_it_connected_to_implementation": "Loads environment variables from a .env file and provides the base URL and users endpoint path used by UserRepository to construct the full API URL for the JSONPlaceholder /users endpoint.",
+        "file_path": "src/config/config.py",
+        "id": "config",
+        "name": "Config",
+        "pseudo_code": "Load .env file if present\n\nConfig class:\n    JSONPLACEHOLDER_BASE_URL = get env var 'JSONPLACEHOLDER_BASE_URL'\n        IF not set: default to 'https://jsonplaceholder.typicode.com'\n    JSONPLACEHOLDER_USERS_ENDPOINT = get env var 'JSONPLACEHOLDER_USERS_ENDPOINT'\n        IF not set: default to '/users'",
+        "type": "function"
+      },
+      {
+        "How_is_it_connected_to_implementation": "Repository function responsible for connecting to the JSONPlaceholder API and retrieving all user records from the /users endpoint. Constructs the URL using Config values, sends a GET request with a timeout, raises an error on HTTP failure, parses the JSON response, and delegates each user dict to _parse_user() to produce domain models.",
         "file_path": "src/data/user_repository.py",
         "id": "user_repository_fetch_all_users",
         "name": "UserRepository.fetch_all_users()",
-        "pseudo_code": "Construct URL for /users endpoint\nSend GET request to URL\nRaise error if request fails\nParse JSON response\nFOR each user in response:\n    Parse user dict into User domain model\nReturn list of User domain models",
+        "pseudo_code": "INIT UserRepository:\n    Set base_url from Config.JSONPLACEHOLDER_BASE_URL (or override)\n    Set users_endpoint from Config.JSONPLACEHOLDER_USERS_ENDPOINT (or override)\n\nfetch_all_users():\n    Construct URL by combining base_url and users_endpoint\n    Send GET request to URL with timeout of 10 seconds\n    Raise HTTPError if response indicates failure\n    Parse JSON response into list of user dicts\n    FOR each user dict in response:\n        Call _parse_user(user dict) to get User domain model\n    Return list of User domain models",
+        "type": "function"
+      },
+      {
+        "How_is_it_connected_to_implementation": "Private helper method called by fetch_all_users() for each user dict in the API response; maps the raw JSON dict fields into Address, Company, and User domain model instances without filtering or transforming the data.",
+        "file_path": "src/data/user_repository.py",
+        "id": "userrepository_parse_user",
+        "name": "UserRepository._parse_user()",
+        "pseudo_code": "_parse_user(data):\n    Create Address from data['address'] fields: street, suite, city, zipcode, geo\n    Create Company from data['company'] fields: name, catchPhrase, bs\n    Create User from data fields: id, name, username, email, phone, website, address, company\n    Return User domain model",
         "type": "function"
       }
     ],
-    "missing_implementations": []
+    "missing_implementations": [
+      "If the JSONPlaceholder API is unreachable, the application MUST report the failure without proceeding. The repository raises an HTTP exception via raise_for_status(), but main() does not catch it or log an explicit failure message, so the error propagates as an unhandled exception without reporting the failure to the user."
+    ]
   }
 }
